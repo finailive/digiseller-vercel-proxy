@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   const base = `category_id${category_id}currency${currency}lang${lang}seller_id${seller_id}${apiKey}`;
   const sign = crypto.createHash('md5').update(base).digest('hex');
 
-  const url = `https://api.digiseller.com/api/products?seller_id=${seller_id}&category_id=${category_id}&lang=${lang}&currency=${currency}&sign=${sign}`;
+  const url = `https://api.digiseller.com/api/products.asp?seller_id=${seller_id}&category_id=${category_id}&lang=${lang}&currency=${currency}&sign=${sign}`;
 
   try {
     const response = await fetch(url);
