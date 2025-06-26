@@ -1,26 +1,22 @@
-// /api/products.js
-import crypto from 'crypto';
+import { parseStringPromise } from 'xml2js';
 
 export default async function handler(req, res) {
-  const { seller_id = '1393244', category_id = '', lang = 'ru', currency = 'USD' } = req.query;
+  const sellerId = req.query.seller_id || '1393244';
+  const start = req.query.start || 0;
+  const pagesize = req.query.pagesize || 20;
 
-  const apiKey = 'FDA3B085C9F54DF8AF5361209C233549';
-
-  // Tạo chuỗi base để ký
-  const base = `category_id${category_id}currency${currency}lang${lang}seller_id${seller_id}${apiKey}`;
-  const sign = crypto.createHash('md5').update(base).digest('hex');
-
-  const url = `https://api.digiseller.com/api/products.asp?seller_id=${seller_id}&category_id=${category_id}&lang=${lang}&currency=${currency}&sign=${sign}`;
+  const url = `https://plati.market/asp/XML/browse.asp?seller_id=${sellerId}&start=${start}&pagesize=${pagesize}`;
 
   try {
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const json = await response.json();
+    if (!response.ok) throw new Error('Lỗi tải dữ liệu');
+
+    const xml = await response.text();
+    const json = await parseStringPromise(xml, { explicitArray: false });
 
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.status(200).json(json);
-  } catch (error) {
-    console.error('Lỗi proxy:', error.message);
-    res.status(500).json({ error: 'Lỗi proxy', detail: error.message });
+  } catch (err) {
+    res.status(500).json({ error: 'Lỗi proxy', detail: err.message });
   }
 }
